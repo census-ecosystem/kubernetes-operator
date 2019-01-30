@@ -5,6 +5,14 @@ through an admission webhook.
 
 It is required to run the webhook before any application that uses OpenCensus library.
 
+## Before you begin
+Make sure that you have:
+
+  * Installed golang (Recommended version 1.11.2)
+  * Installed Docker
+  * Installed kubectl
+  * (Optional) Installed gcloud (if running on GKE)
+
 ## Build locally (optional)
 
 1. Install make, see more instruction on how to install make [here](https://www.gnu.org/software/make/).
