@@ -33,6 +33,7 @@ spec:
         - 'autoconf'
         - '--tls.cert-file=/etc/tls/cert.pem'
         - '--tls.key-file=/etc/tls/key.pem'
+        - '--configure-default'
         ports:
         - name: webhook
           containerPort: 8443
