@@ -14,10 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-[ -z ${NAMESPACE} ] && NAMESPACE=default
+[ -z ${CLUSTER_NAME} ] && CLUSTER_NAME=""
 [ -z ${IMAGE} ] && IMAGE=gcr.io/prometheus-to-sd/opencensus-operator
-export NAMESPACE
+[ -z ${NAMESPACE} ] && NAMESPACE=default
+
+export CLUSTER_NAME
 export IMAGE
+export NAMESPACE
 
 set -e
 set -u

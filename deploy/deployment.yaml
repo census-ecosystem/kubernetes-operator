@@ -34,6 +34,7 @@ spec:
         - '--tls.cert-file=/etc/tls/cert.pem'
         - '--tls.key-file=/etc/tls/key.pem'
         - '--configure-default'
+        - "--cluster-name=${CLUSTER_NAME}"
         ports:
         - name: webhook
           containerPort: 8443
