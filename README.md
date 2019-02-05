@@ -24,16 +24,15 @@ make container
 
 ## Deploy
 To deploy the standard webhook into a cluster (by default this will be deployed in the default 
-namespace), 
-run:
+namespace), run:
 
 ```bash
-deploy/deploy.sh
+CLUSTER_NAME=target_cluster deploy/deploy.sh
 ```
 
 (Optional) You can deploy the webhook in a specific NAMESPACE and using a specific IMAGE:
 ```bash
-NAMESPACE=target_namespace IMAGE=image_name deploy/deploy.sh
+CLUSTER_NAME=target_cluster NAMESPACE=target_namespace IMAGE=image_name deploy/deploy.sh
 ```
 
 ## Testing (optional)
