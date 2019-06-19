@@ -23,11 +23,12 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 
-	"contrib.go.opencensus.io/resource/resourcekeys"
+	"go.opencensus.io/resource/resourcekeys"
 	"go.opencensus.io/resource"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	"gopkg.in/alecthomas/kingpin.v2"
 	admission "k8s.io/api/admission/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -181,6 +182,7 @@ type patchOperation struct {
 
 func createPatch(clusterName, namespace, podName string, pod *corev1.Pod) ([]byte, error) {
 	var patch []patchOperation
+	dName := ""
 
 	// If no pod name is known yet, we set it ourselves based on the generate name.
 	// The API server applies exactly the same logic otherwise.
@@ -196,6 +198,13 @@ func createPatch(clusterName, namespace, podName string, pod *corev1.Pod) ([]byt
 		} else {
 			return nil, errors.New("unable to configure pod without name or generate name")
 		}
+	}
+	// Extract deployment name from the pod name. Pod name is created using
+	// format: [deployment-name]-[Random-String-For-ReplicaSet]-[Random-String-For-Pod]
+	dRegex, _ := regexp.Compile(`^(.*)-([0-9a-zA-Z]*)-([0-9a-zA-Z]*)$`)
+	parts := dRegex.FindStringSubmatch(podName)
+	if len(parts) == 4 {
+		dName = parts[1]
 	}
 
 	// Set the OpenCensus resource environment variables for each container.
@@ -219,7 +228,7 @@ func createPatch(clusterName, namespace, podName string, pod *corev1.Pod) ([]byt
 				Path: path + "/env/-",
 				Value: corev1.EnvVar{
 					Name:  resource.EnvVarType,
-					Value: resourcekeys.K8STypeContainer,
+					Value: resourcekeys.ContainerType,
 				},
 			},
 			patchOperation{
@@ -227,7 +236,7 @@ func createPatch(clusterName, namespace, podName string, pod *corev1.Pod) ([]byt
 				Path: path + "/env/-",
 				Value: corev1.EnvVar{
 					Name:  resource.EnvVarLabels,
-					Value: buildResourceTags(clusterName, namespace, podName, c.Name),
+					Value: buildResourceTags(clusterName, namespace, podName, c.Name, dName),
 				},
 			},
 		)
@@ -235,11 +244,15 @@ func createPatch(clusterName, namespace, podName string, pod *corev1.Pod) ([]byt
 	return json.Marshal(patch)
 }
 
-func buildResourceTags(cluster, namespace, pod, container string) string {
-	return resource.EncodeLabels(map[string]string{
-		resourcekeys.K8SKeyClusterName:   cluster,
-		resourcekeys.K8SKeyNamespaceName: namespace,
-		resourcekeys.K8SKeyPodName:       pod,
-		resourcekeys.K8SKeyContainerName: container,
-	})
+func buildResourceTags(cluster, namespace, pod, container, dName string) string {
+	labels := map[string]string{
+		resourcekeys.K8SKeyClusterName:    cluster,
+		resourcekeys.K8SKeyNamespaceName:  namespace,
+		resourcekeys.K8SKeyPodName:        pod,
+		resourcekeys.ContainerKeyName:     container,
+	}
+	if dName != "" {
+		labels[resourcekeys.K8SKeyDeploymentName] = dName
+	}
+	return resource.EncodeLabels(labels)
 }
