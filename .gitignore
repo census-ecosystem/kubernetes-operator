@@ -1,2 +1,4 @@
 _tmp/
 opencensus-operator
+.idea/*
+*.iml
