@@ -150,13 +150,13 @@ func (cmd *autoconfCmd) autoconf(req *admission.AdmissionRequest) *admission.Adm
 		shouldConfigure = b
 	} else {
 		log.Printf("Invalid value %q for annotation %s on pod %s/%s, continuing with default",
-			pod.Annotations[annotationConfigure], annotationConfigure, pod.Namespace, pod.Name)
+			pod.Annotations[annotationConfigure], annotationConfigure, namespace, name)
 	}
 	if !shouldConfigure {
 		return &admission.AdmissionResponse{Allowed: true}
 	}
 
-	log.Printf("configuring pod %s/%s", pod.Namespace, pod.Name)
+	log.Printf("configuring pod %s/%s", namespace, name)
 
 	patch, err := createPatch(cmd.clusterName, namespace, name, &pod)
 	if err != nil {
