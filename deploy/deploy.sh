@@ -15,7 +15,7 @@
 # limitations under the License.
 
 [ -z ${CLUSTER_NAME} ] && CLUSTER_NAME=""
-[ -z ${IMAGE} ] && IMAGE=gcr.io/opencensus/operator:0.1
+[ -z ${IMAGE} ] && IMAGE=gcr.io/opencensus/operator:0.2
 [ -z ${NAMESPACE} ] && NAMESPACE=default
 
 export CLUSTER_NAME
